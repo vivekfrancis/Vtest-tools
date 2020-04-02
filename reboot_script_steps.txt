@@ -44,18 +44,26 @@ Steps to be done to execute Reboot script.
        table_result = []
        for i in range(1): # Number of reboot need to mentioned inside range. ex:range(50)
     
-   You need to create the cli template for the device which you want to reboot.
-   @run.test(['test_create_cli_templates'])
-   def test_create_cli_templates(self):
-       failcount = 0
-       PushfailedDevices = []
-       pm_vedges = ['pm9009','pm9009'] # update the device which you want create template
+   You need to create the Feature template for the cedges before execting reboot script.
+   "NOTE" test_create_feature_template will remove the existing feature templates.
+   @run.test(['test_create_feature_template'])
+   def test_create_feature_template(self):
+           #***** Delete all existing non default feature templates *****
+           self.test_delete_all_existing_feature_templates()
+           pm_vedges = ['pm9006'] # mention the required cedges
        
-12. Once you are done with all these changes you are ready to go.
+10. Once you are done with all these changes you are ready to go.
     cd /home/tester/vtest-tools/suites/
-    Create template by executing below test case.
-    python vivek_appqoe_system.py bglsystemtestbed -t test_create_cli_templates_for_devices -ntg -nt -ne -no_slack
+    To execute reboot script on cedges you need to execute the below script. 
+    For vedges you can skip this step.
+    python vivek_appqoe_system.py bglsystemtestbed -t test_create_feature_template -ntg -nt -ne -no_slack
 
-    Once Create template is successfull you can execute reboot script with below commands
+    After creating the template you need to edit vpn configs manually in the template.
+    Edit vpn 0 and vpn 512 and save it.
+    This manual interuption is due to bug. Please refer this bug.
+    CSCvt46442
+    
+
+    Once template creation is successfull you can execute reboot script with below commands
     python vivek_appqoe_system.py bglsystemtestbed -t RebootDevices -ntg -nt -ne -no_slack 
  
