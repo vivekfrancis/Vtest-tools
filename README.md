@@ -1,4 +1,4 @@
-Steps to Execute Reboot script.
+Steps to be done to execute Reboot script.
 1. source the profile.
    source ~/.profile
 2. Execute "run.py" which is located under  "/home/tester/vtest-tools/confd_server"
@@ -33,7 +33,7 @@ Steps to Execute Reboot script.
    DEVICE_TYPE['pm9010']   = 'vedge-ISR-4461'
    DEVICE_TYPE['pm9012']   = 'vedge-2000'
 
-10. Provide the list of boxes in pm_vedges list for reboot.
+    Provide the list of boxes in pm_vedges list for reboot.
     Number of devices and reboots can be changed in the below code according to your setup and requirement.
     @run.test(['RebootDevices'])
     def RebootDevices(self):
@@ -44,5 +44,18 @@ Steps to Execute Reboot script.
        table_result = []
        for i in range(1): # Number of reboot need to mentioned inside range. ex:range(50)
     
+   You need to create the cli template for the device which you want to reboot.
+   @run.test(['test_create_cli_templates'])
+   def test_create_cli_templates(self):
+       failcount = 0
+       PushfailedDevices = []
+       pm_vedges = ['pm9009','pm9009'] # update the device which you want create template
        
-11. You need to create the template before executing the script.
+12. Once you are done with all these changes you are ready to go.
+    cd /home/tester/vtest-tools/suites/
+    Create template by executing below test case.
+    python vivek_appqoe_system.py bglsystemtestbed -t test_create_cli_templates_for_devices -ntg -nt -ne -no_slack
+
+    Once Create template is successfull you can execute reboot script with below commands
+    python vivek_appqoe_system.py bglsystemtestbed -t RebootDevices -ntg -nt -ne -no_slack 
+ 
