@@ -129,24 +129,25 @@ class appqoe_system(object):
         DEVICE_TYPE['pm9010']   = 'vedge-ISR-4461'
         DEVICE_TYPE['pm9012']   = 'vedge-2000'
 
+
     #---------------------------------------------------------------------------
-    @run.test(['control', 'basic','test_create_cli_templates_for_devices'])
-    def test_create_cli_templates_for_devices(self):
-        failcount = 0
-        pm_vedges = ['pm9009','pm9012']
-        PushfailedDevices = []
-        #Delete if any existing templates in loop
-        """Get template ids for deleting existing templates"""
-        template_id = None
-        response = vman_session.config.tmpl.get_template(profile, None)
-        if response.status_code == 200:
-            template_data = response.json()['data']
-        for template in range(len(template_data)):
-            template_id = template_data[template]['templateId']
-            delres = vman_session.config.tmpl.delete_template(profile,None,template_id)
-        if delres == 200:
-            self.logger.info('Able to delete existing templates successfully')
-        for device in pm_vedges:
+    #@run.test(['test_create_cli_templates_for_devices'])
+    def test_create_cli_templates_for_devices(self,device):
+            failcount = 0
+            PushfailedDevices = []
+            #Delete if any existing templates in loop
+            # """Get template ids for deleting existing templates"""
+            template_id = None
+            response = vman_session.config.tmpl.get_template(profile, None)
+            if response.status_code == 200:
+                template_data = response.json()['data']
+            for template in range(len(template_data)):
+                if template_data[template]['templateName'] == device + '_Template':
+                    template_id = template_data[template]['templateId']
+                    delres = vman_session.config.tmpl.delete_template(profile,None,template_id)
+                    if delres == 200:
+                        self.logger.info('Able to delete existing templates successfully')
+            #for device in pm_vedges:
             device_type = DEVICE_TYPE[device]
             uuid = http.get_device_property_from_key( "uuid", 'host-name', device)
             uuids = []
@@ -156,8 +157,10 @@ class appqoe_system(object):
             res = vman_session.config.dev.get_device_running_config(profile,None,uuid)
             system_ip = self.topology.system_ip(device)
             config = self.get_config(res)
-            template_name = 'cli_template' + device
-            template_desc = 'cli_templatedesc' + device
+            # template_name = 'cli_template' + device
+            # template_desc = 'cli_templatedesc' + device
+            template_name = device + '_Template'
+            template_desc = device + '_Template'
             """Create template for device"""
             return_status = vman_session.config.tmpl.create_cli_template(profile, None, template_name, template_desc,device_type, config, "file", "false")
             if int(return_status.status_code) != 200:
@@ -197,12 +200,12 @@ class appqoe_system(object):
                 self.logger.info('Failed to create Cli template for [%s]' % device)
                 PushfailedDevices.append(device)
 
-        if failcount == 0:
-            return [True, 'Successfully created Cli template for all the devices']
-        else:
-            for device in PushfailedDevices:
-                self.logger.info('Failed to create Cli template for [%s]' % device)
-            return [False, 'Not able to create template for all the devices']
+            if failcount == 0:
+                return [True, 'Successfully created Cli template for all the devices']
+            else:
+                for device in PushfailedDevices:
+                    self.logger.info('Failed to create Cli template for [%s]' % device)
+                return [False, 'Not able to create template for all the devices']
 
     # @run.test(['test_create_cli_templates_for_vSmart'])
     def test_create_cli_templates_for_vSmart(self):
@@ -270,7 +273,7 @@ class appqoe_system(object):
     def test_edit_cli_templates_Appqoe_configs(self):
         failcount = 0
         PushfailedDevices = []
-        pm_vedges = ['pm9009','pm9009']
+        pm_vedges = ['pm9009','pm9010']
         for device in pm_vedges:
             device_type = DEVICE_TYPE[device]
             uuid = http.get_device_property_from_key( "uuid", 'host-name', device)
@@ -320,8 +323,6 @@ class appqoe_system(object):
                 uuid = uuid.replace('%2F','/')
             uuids.append(uuid)
             res = vman_session.config.tmpl.attach_devices_to_template(profile, None, template_id, uuids,'true', 'true')
-            # import pdb
-            # pdb.set_trace()
             if res.status_code != 200:
                 return[False,'Not able to find available devices']
             if '%2F' in uuid:
@@ -628,7 +629,8 @@ class appqoe_system(object):
 
 
             vpnname = 'vpn1'
-            vpnentries = [{'vpn': "1"}]
+            vpnValue = self.config['VPN']
+            vpnentries = [{'vpn': vpnValue}]
 
             vpnRes = vman_session.config.policy.create_VPN_List(profile, None,vpnname,vpnentries)
             siteIdList = vman_session.config.policy.get_SITEList(profile, None)
@@ -681,15 +683,6 @@ class appqoe_system(object):
                                                 {'type': "tcpOptimization", 'parameter': "null"}
                                                 ]
                 }
-                # {
-                #             'sequenceId'     : 11,
-                #             'sequenceName'   : "Custom",
-                #             'baseAction'     : "accept",
-                #             'sequenceType'   : "data",
-                #             'sequenceIpType' : "ipv4",
-                #             'match'          :  {'entries': [{'field': "destinationDataPrefixList", 'ref': destNwRefId}] },
-                #             'actions'        :  [{'type': "tcpOptimization", 'parameter': "null"}]
-                # }
                 ]
             if self.config['PacketDup'] == True:
                 sequence2[0]['actions'].append(
@@ -749,7 +742,8 @@ class appqoe_system(object):
             resp = vman_session.config.policy.createPolicy(profile, None,policyDefinition)
             if resp.status_code == 200:
                 return [True, 'Datapolicy created successfully']
-            return [False, 'Datapolicy is not created']
+            else:
+                return [False, 'Datapolicy is not created']
 
 
     #@run.test(['Activatedatapolicy'])
@@ -806,11 +800,11 @@ class appqoe_system(object):
 
     @run.test(['RebootDevices'])
     def RebootDevices(self):
-        pm_vedges = ['pm9006']
+        pm_vedges = ['pm9006','pm9008','pm9010']
         failcount = 0
         PushfailedDevices = []
         table_result = []
-        for i in range(51):
+        for i in range(5):
             bfdSessionFlag = []
             ompSessionFlag = []
             attachFail     = []
@@ -823,7 +817,10 @@ class appqoe_system(object):
                 table_result.append(['',''])
                 self.logger.info('******** Template attach on iteration: **********:  {}'.format(i))
 
-                attachresult = self.test_feature_template_Edit_Attach(device)
+                if 'vedge_' in self.config['machines'][device]['personality']:
+                    attachresult = self.test_create_cli_templates_for_devices(device)
+                else:
+                    attachresult = self.test_feature_template_Edit_Attach(device)
                 if attachresult:
                     self.logger.info('******** Attach successfull on iteration: **********:  {}'.format(i))
                     table_result.append(['Test Attach Feature Template: ', 'PASS'])
@@ -886,6 +883,7 @@ class appqoe_system(object):
                     table_result.append(['Test BFD Sessions up before Reboot: ', 'PASS'])
                 else:
                     table_result.append(['Test BFD Sessions up before Reboot: ', 'FAIL'])
+                    flag = flag + 1
                 #Get omp peer check summary before reboot
                 res = vman_session.maint.dev_reboot.get_omp_summary(profile, None,system_ip)
                 if res.status_code == 200:
@@ -900,6 +898,7 @@ class appqoe_system(object):
                     table_result.append(['Test OMP peer Sessions up before Reboot: ', 'PASS'])
                 else:
                     table_result.append(['Test OMP peer Sessions up before Reboot: ', 'FAIL'])
+                    flag = flag + 1
                 devices = [
                     {
                         'deviceIP' : system_ip, 'deviceId' : uuid
@@ -926,6 +925,7 @@ class appqoe_system(object):
                         self.logger.info('Failed to reboot for iteration: {}'.format(i))
                         table_result.append(['Test Reboot device: ', 'FAIL'])
                         PushfailedDevices.append(device)
+                        flag = flag + 1
                 except:
                     pass
                     self.logger.info('Caught an exception on reboot for iteration: {}'.format(i))
@@ -953,6 +953,7 @@ class appqoe_system(object):
                             table_result.append(['Test Check Crash logs: ', 'FAIL'])
                             self.logger.info(' ******** Crash found ********** ')
                             self.logger.info('Crash found for device [%s]' % device)
+                            flag = flag + 1
                             for eachcrash in data :
                                 self.logger.info('core time :', eachcrash['core-time'])
                                 self.logger.info('core filename :', eachcrash['core-filename'])
@@ -961,28 +962,28 @@ class appqoe_system(object):
                     pass
                     self.logger.info('Caught an exception on fetching crash log for iteration: {}'.format(i))
                 #verify any hardware errors in device
-                try:
-                    hardwareErrorres = vman_session.dashboard.get_device_Hardware_errors(profile, None)
-                    if hardwareErrorres.status_code == 200:
-                        self.logger.info('Fetching hardware errors')
-                        data = json.loads(hardwareErrorres.content)['data']
-                        if not data:
-                            table_result.append(['Test Hardware errors: ', 'PASS'])
-                            self.logger.info('Hardware errors are not seen')
-                        else:
-                            self.logger.info(' ******** Found hardware errors ********** ')
-                            table_result.append(['Test Hardware errors: ', 'FAIL'])
-                            for eacherror in data :
-                                if eacherror['vdevice-host-name'] == device:
-                                    self.logger.info('Hardware errors are seen on device [%s]' % device)
-                                    self.logger.info('alarm-description:',eacherror['alarm-description'])
-                                    self.logger.info('alarm-time:',eacherror['alarm-time'])
-                                    self.logger.info('alarm-category:',eacherror['alarm-time'])
-                                else:
-                                    self.logger.info('Hardware errors are not seen on device [%s]' % device)
-                except:
-                    pass
-                    self.logger.info('Caught an exception on fetching hardware errors on iteration: {}'.format(i))
+                # try:
+                #     hardwareErrorres = vman_session.dashboard.get_device_Hardware_errors(profile, None)
+                #     if hardwareErrorres.status_code == 200:
+                #         self.logger.info('Fetching hardware errors')
+                #         data = json.loads(hardwareErrorres.content)['data']
+                #         if not data:
+                #             table_result.append(['Test Hardware errors: ', 'PASS'])
+                #             self.logger.info('Hardware errors are not seen')
+                #         else:
+                #             self.logger.info(' ******** Found hardware errors ********** ')
+                #             table_result.append(['Test Hardware errors: ', 'FAIL'])
+                #             for eacherror in data :
+                #                 if eacherror['vdevice-host-name'] == device:
+                #                     self.logger.info('Hardware errors are seen on device [%s]' % device)
+                #                     self.logger.info('alarm-description:',eacherror['alarm-description'])
+                #                     self.logger.info('alarm-time:',eacherror['alarm-time'])
+                #                     self.logger.info('alarm-category:',eacherror['alarm-time'])
+                #                 else:
+                #                     self.logger.info('Hardware errors are not seen on device [%s]' % device)
+                # except:
+                #     pass
+                #     self.logger.info('Caught an exception on fetching hardware errors on iteration: {}'.format(i))
                 #Get bfd sessions output after reboot
                 try:
                     res = vman_session.maint.dev_reboot.get_bfd_summary(profile, None,system_ip)
@@ -1037,6 +1038,7 @@ class appqoe_system(object):
                 else:
                     table_result.append(['Test Detach Feature Template: ', 'FAIL'])
                     self.logger.info('******** detach failure on iteration: **********:  {}'.format(i))
+                    flag = flag + 1
 
             self.logger.info('******** Completed reboot iteration **********:  {}'.format(i))
             if bfdSessionFlag:
@@ -1053,19 +1055,36 @@ class appqoe_system(object):
             else:
                 self.logger.info('OMP count matched on iteration: {}'.format(i))
             table.add_rows(table_result)
-            print table.draw()
-        if failcount == 0:
+        print table.draw()
+        if flag == 0:
             return [True, 'Successfully rebooted all the devices']
         else:
-            for device in PushfailedDevices:
-                self.logger.info('Failed to reboot for [%s]' % device)
             return [False, 'Not able to reboot all the devices']
 
     #@run.test(['test_Securitypolicy'])
     def test_Securitypolicy(self):
-        res = vman_session.config.policy.get_zoneBaseFW(profile,None)
+        vpnValue = self.config['VPN']
+        vpnentries = [{'vpn': vpnValue}]
+
+        createzbfw = vman_session.config.policy.create_zonelist(profile, None, vpnentries)
+        if createzbfw.status_code == 200:
+            zoneListId = json.loads(createzbfw.content)['listId']
+        getdataPrefix = vman_session.config.policy.get_dataPrefixlist(profile, None)
+        if getdataPrefix.status_code != 200:
+               self.logger.info('unable to get dataprefix list')
+
+        else:
+            for i in range(len(getdataPrefix.json()['data'])):
+                if getdataPrefix.json()['data'][i]['name'] == 'srcNetwork':
+                        srcNwRefId = getdataPrefix.json()['data'][i]['listId']
+                elif getdataPrefix.json()['data'][i]['name'] == 'destNetwork':
+                        destNwRefId = getdataPrefix.json()['data'][i]['listId']
+
+        res = vman_session.config.policy.create_zbfw_policy(profile,None,srcNwRefId,destNwRefId,zoneListId)
         if res.status_code != 200:
             self.logger.info('No response found for ZBF')
+        else:
+            zbfwpolicyId = json.loads(res.content)['definitionId']
         targetVPNs = ['1','2']
         res = vman_session.config.policy.create_Intrusion_prevention(profile,None,targetVPNs)
         if res.status_code != 200:
@@ -1113,12 +1132,13 @@ class appqoe_system(object):
             return [False, 'Not able to create TLSSSLPolicy']
         TLSSSLpolicyId = json.loads(res.content)['definitionId']
         InrusionPrevId = str(InrusionPrevId)
-        #URLFpolicyId = str(URLFpolicyId)
-        URLFpolicyId = ''
-        AMPpolicyId = ''
-        #AMPpolicyId = str(AMPpolicyId)
+        URLFpolicyId = str(URLFpolicyId)
+        # URLFpolicyId = ''
+        # AMPpolicyId = ''
+        AMPpolicyId = str(AMPpolicyId)
         TLSSSLpolicyId = str(TLSSSLpolicyId)
-        res = vman_session.config.policy.create_SecurityPolicy(profile,None,InrusionPrevId,URLFpolicyId,AMPpolicyId,TLSSSLpolicyId)
+        zbfwpolicyId = str(zbfwpolicyId)
+        res = vman_session.config.policy.create_SecurityPolicy(profile,None,zbfwpolicyId,InrusionPrevId,URLFpolicyId,AMPpolicyId,TLSSSLpolicyId)
         if res.status_code != 200:
             return [False, 'Not able to create security policy']
         return [True, 'Able to create security policy']
@@ -1303,6 +1323,20 @@ class appqoe_system(object):
                 res = vman_session.config.policy.delete_securityPolicy(profile,None,securityPolicyId)
                 if res.status_code == 200:
                     self.logger.info('Deleted security policy ids')
+        res = vman_session.config.policy.get_zoneBaseFW(profile,None)
+        if res.status_code == 200:
+            for policy in range(len(json.loads(res.content)['data'])):
+                zbfw_pol_id = json.loads(res.content)['data'][policy]['definitionId']
+                res = vman_session.config.policy.delete_Zbfw_policy(profile,None,zbfw_pol_id)
+                if res.status_code == 200:
+                    self.logger.info('Deleted Zone base firewall policy')
+        res = vman_session.config.policy.get_ZoneList(profile,None)
+        if res.status_code == 200:
+            for id in range(len(json.loads(res.content)['data'])):
+                listId = json.loads(res.content)['data'][id]['listId']
+                res = vman_session.config.policy.deleteZBFWList(profile,None,listId)
+                if res.status_code == 200:
+                    self.logger.info('Deleted ZBFWList')
         res = vman_session.config.policy.get_Intrusion_prevention(profile,None)
         if res.status_code == 200:
             for policy in range(len(json.loads(res.content)['data'])):
@@ -1456,7 +1490,7 @@ class appqoe_system(object):
     def test_create_feature_template(self):
             #***** Delete all existing non default feature templates *****
             self.test_delete_all_existing_feature_templates()
-            pm_vedges = ['pm9006']
+            pm_vedges = ['pm9009']
             for device in pm_vedges:
                 hostname = device
                 device_type = DEVICE_TYPE[device]
@@ -1787,7 +1821,7 @@ class appqoe_system(object):
 
             if push_response.status_code != 200:
                 return[False,'Not able to attach template']
-            time.sleep(30)
+            # time.sleep(30)
             res = vman_session.config.policy.get_Lxc_install_status(profile, None)
             lxcInstallprocessId = json.loads(res.content)['data'][0]['processId']
             task_status = "Success"
@@ -1805,7 +1839,7 @@ class appqoe_system(object):
             output = self.confd_client.sendline(dest_ip, cmd)
             output = output['message']
             flag = 0
-            time.sleep(150)
+            time.sleep(300)
             for line in output.split('\n'):
                 if 'Current status of SN' in line:
                     if 'Alive' in line:
@@ -1959,13 +1993,12 @@ class appqoe_system(object):
                             return[False,'TcpProxy statistics count is zero']
             return [False, 'tcpproxy statistics is not as expected']
 
-
     def test_clear_tcpProxy_Statistics(self,device):
-            #device = 'pm9009'
-            cmd = 'clear tcpproxy statistics'
-            dest_ip = self.topology.mgmt_ipaddr(device)
-            output = self.confd_client.sendline(dest_ip, cmd)
-            return [True, 'tcpproxy statistics are cleared']
+        #device = 'pm9009'
+        cmd = 'clear tcpproxy statistics'
+        dest_ip = self.topology.mgmt_ipaddr(device)
+        output = self.confd_client.sendline(dest_ip, cmd)
+        return [True, 'tcpproxy statistics are cleared']
 
     # @run.test(['test_show_version'])
     def test_show_version(self,device):
