@@ -46,7 +46,7 @@ class Policy(Basics):
                    'entries': entries,
                    }
         return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
-    
+
     def create_VPN_List(self, profile, expectation,vpnname,entries):
         self.updateToken(profile)
         mount_point = '/template/policy/list/vpn/'
@@ -71,8 +71,8 @@ class Policy(Basics):
                     'type'          : "data",
                     'description'   : description,
                     'defaultAction' : {'type': "accept"},
-                    'sequences'     : sequence              
-                 } 
+                    'sequences'     : sequence
+                 }
         return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
 
     def get_dataPrefixlist(self, profile, expectation):
@@ -111,7 +111,7 @@ class Policy(Basics):
         headers = {'Host': profile.domain_name}
         return self.http_request(profile, 'GET', url, headers, None, expectation=expectation)
 
-    
+
     def delete_SITEList(self, profile, expectation,definition_id):
         self.updateToken(profile)
         mount_point = 'template/policy/list/site/{}'.format(definition_id)
@@ -133,7 +133,7 @@ class Policy(Basics):
         headers = {'Host': profile.domain_name}
         print(url)
         return self.http_request(profile, 'DELETE', url, headers, None, expectation=expectation)
-    
+
     def delete_appRoute(self, profile, expectation,definition_id):
         self.updateToken(profile)
         mount_point = 'template/policy/definition/approute/{}'.format(definition_id)
@@ -155,13 +155,13 @@ class Policy(Basics):
         url = self._generate_url(profile.vmanage_hostname, mount_point)
         headers = {'Host': profile.domain_name,
                    'Content-Type'   : 'application/json'}
-        payload = {  
+        payload = {
                     'policyDescription' : "desc",
                     'policyType'        : "feature",
                     'policyName'        : "TestDatapolicy",
                     'isPolicyActivated' : 'false',
                     'policyDefinition'  : policyDefinition
-                 } 
+                 }
         print(json.dumps(payload))
         print(url)
         print(payload)
@@ -196,7 +196,7 @@ class Policy(Basics):
         headers = {'Host': profile.domain_name,
                    'Content-Type'   : 'application/json'}
         payload = {
-                 }    
+                 }
         return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
 
     def deactivate_policy(self,profile, expectation, policy_id):
@@ -207,7 +207,7 @@ class Policy(Basics):
         headers = {'Host': profile.domain_name,
                    'Content-Type'   : 'application/json'}
         payload = {
-                 }    
+                 }
         return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
 
     # def createPolicy(self, profile, expectation,policyDefinition):
@@ -216,22 +216,22 @@ class Policy(Basics):
     #     url = self._generate_url(profile.vmanage_hostname, mount_point)
     #     headers = {'Host': profile.domain_name,
     #                'Content-Type'   : 'application/json'}
-    #     payload = {  
+    #     payload = {
     #                 'policyDescription' : "desc",
     #                 'policyType'        : "feature",
     #                 'policyName'        : "TestDatapolicy",
     #                 'isPolicyActivated' : 'false',
     #                 'policyDefinition'  : policyDefinition
-    #              } 
+    #              }
     #     return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
-    
+
     def createControlPolicy(self, profile, expectation,sequences,match,actions):
         self.updateToken(profile)
         mount_point = 'template/policy/definition/control'
         url = self._generate_url(profile.vmanage_hostname, mount_point)
         headers = {'Host': profile.domain_name,
                    'Content-Type'   : 'application/json'}
-        payload = {  
+        payload = {
                     'name'          : "TestControlPolicy",
                     'type'          : "control",
                     'description'   : "desc",
@@ -239,11 +239,11 @@ class Policy(Basics):
                     'sequences'     : sequences,
                     'match'         :  match,
                     'actions'       : actions
-                 } 
+                 }
         return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
 
 ###### Security policy ##########
-    
+
     def get_zoneBaseFW(self, profile, expectation):
         self.updateToken(profile)
         mount_point = 'template/policy/definition/zonebasedfw'
@@ -271,7 +271,7 @@ class Policy(Basics):
         url = self._generate_url(profile.vmanage_hostname, mount_point)
         headers = {'Host': profile.domain_name}
         return self.http_request(profile, 'GET', url, headers, None, expectation=expectation)
-    
+
     def get_SSL(self, profile, expectation):
         self.updateToken(profile)
         mount_point = 'template/policy/definition/ssldecryption'
@@ -306,28 +306,28 @@ class Policy(Basics):
         url = self._generate_url(profile.vmanage_hostname, mount_point)
         headers = {'Host': profile.domain_name,
                    'Content-Type'   : 'application/json'}
-        payload = {  
+        payload = {
                     'name'                :   "TestIPP",
                     'type'                :   "intrusionPrevention",
                     'description'         :   "Testing",
                     'definition'          :   {
-                                                'signatureSet'       :   "security", 
-                                                'inspectionMode'     :   "detection", 
-                                                'signatureWhiteList' :   {}, 
+                                                'signatureSet'       :   "security",
+                                                'inspectionMode'     :   "detection",
+                                                'signatureWhiteList' :   {},
                                                 'logLevel'           :   "warning",
                                                 'logging'            :   [],
                                                 'targetVpns'         :   targetVPNs
                                               }
-                 } 
+                 }
         return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
-    
+
     def create_URLF_Policy(self, profile, expectation, targetVPNs,whiteListId,blackListId):
         self.updateToken(profile)
         mount_point = 'template/policy/definition/urlfiltering'
         url = self._generate_url(profile.vmanage_hostname, mount_point)
         headers = {'Host': profile.domain_name,
                    'Content-Type'   : 'application/json'}
-        payload = {  
+        payload = {
                     'name'              :     "TestURLF",
                     'type'              :     "urlFiltering",
                     'description'       :     "",
@@ -338,15 +338,15 @@ class Policy(Basics):
                                                 'urlWhiteList'        :     { 'ref' : whiteListId},
                                                 'urlBlackList'        :     { 'ref' : blackListId},
                                                 'blockPageAction'     :     "text",
-                                                'blockPageContents'   :     "&lt;h3&gt;Access to the requested page has been denied&lt;/h3&gt;&lt;p&gt;Please contact your Network Administrator&lt;/p&gt;",
+                                                'blockPageContents'   :     "Access to the requested page has been denied. Please contact your Network Administrator",
                                                 'enableAlerts'        :     'false',
                                                 'alerts'              :      [],
                                                 'logging'             :      [],
                                                 'targetVpns'          :   targetVPNs
                                                 }
-                 } 
+                 }
         return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
-    
+
 
     def create_whitelist_url(self, profile, expectation, urlPattern,name):
         self.updateToken(profile)
@@ -354,13 +354,13 @@ class Policy(Basics):
         url = self._generate_url(profile.vmanage_hostname, mount_point)
         headers = {'Host': profile.domain_name,
                    'Content-Type'   : 'application/json'}
-        payload = {  
+        payload = {
                         'name'            :   name,
                         'description'     :   "Desc Not Required",
                         'type'            :   "urlwhitelist",
-                        'entries'         :   [ {'pattern': urlPattern} ] 
+                        'entries'         :   [ {'pattern': urlPattern} ]
 
-                 } 
+                 }
         return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
 
     def create_blacklist_url(self, profile, expectation, urlPattern,name):
@@ -369,40 +369,40 @@ class Policy(Basics):
         url = self._generate_url(profile.vmanage_hostname, mount_point)
         headers = {'Host': profile.domain_name,
                    'Content-Type'   : 'application/json'}
-        payload = {  
+        payload = {
                         'name'            :   name,
                         'description'     :   "Desc Not Required",
                         'type'            :   "urlblacklist",
-                        'entries'         :   [ {'pattern': urlPattern} ] 
+                        'entries'         :   [ {'pattern': urlPattern} ]
 
-                 } 
+                 }
         return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
 
-    def create_SecurityPolicy(self, profile, expectation,InrusionPrevId,URLFpolicyId,AMPpolicyId,TLSSSLpolicyId):
+    def create_SecurityPolicy(self, profile, expectation,zbfw_defid,InrusionPrevId,URLFpolicyId,AMPpolicyId,TLSSSLpolicyId):
         self.updateToken(profile)
         mount_point = 'template/policy/security/'
         url = self._generate_url(profile.vmanage_hostname, mount_point)
         headers = {'Host': profile.domain_name,
                    'Content-Type'   : 'application/json'}
-        payload = {  
+        payload = {
                         'policyDescription'     :    "desc",
                         'policyType'            :    "feature",
                         'policyName'            :    "secpolicy",
                         'policyUseCase'         :    "custom",
                         'isPolicyActivated'     :   'false',
                         'policyDefinition'      :   {
-                                                    'assembly'       : [
+                                                    'assembly'       : [        {'definitionId': zbfw_defid, 'type': "zoneBasedFW"},
                                                                                 {'definitionId': InrusionPrevId, 'type': "intrusionPrevention"},
-                                                                                #{'definitionId': URLFpolicyId, 'type': "urlFiltering"},
-                                                                                #{'definitionId': AMPpolicyId, 'type': "advancedMalwareProtection"},
+                                                                                {'definitionId': URLFpolicyId, 'type': "urlFiltering"},
+                                                                                {'definitionId': AMPpolicyId, 'type': "advancedMalwareProtection"},
                                                                                 {'definitionId': TLSSSLpolicyId, 'type': "sslDecryption"}
                                                                        ],
-                                                    
+
                                                     'settings'              :   {'failureMode': "open"}
                                                     }
-                        
+
                  }
-        
+
         return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
 
     def create_AMP(self, profile, expectation, targetVPNs):
@@ -411,7 +411,7 @@ class Policy(Basics):
         url = self._generate_url(profile.vmanage_hostname, mount_point)
         headers = {'Host': profile.domain_name,
                    'Content-Type'   : 'application/json'}
-        payload = {  
+        payload = {
                     'name'                      :    "TestAMP",
                     'type'                      :    "advancedMalwareProtection",
                     'description'               :    "",
@@ -425,10 +425,10 @@ class Policy(Basics):
                                                     'fileAnalysisAlert'         :   "",
                                                     'targetVpns'                :   targetVPNs
                                                     }
-                 } 
+                 }
         return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
 
-    
+
     def create_TLSSSLPolicy(self, profile, expectation, sequence):
         self.updateToken(profile)
         a = True
@@ -485,6 +485,60 @@ class Policy(Basics):
                                                 }
         return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
 
+    def create_zbfw_policy(self, profile, expectation,srcNwRefId,destNwRefId,zoneListId):
+        self.updateToken(profile)
+        mount_point = 'template/policy/definition/zonebasedfw'
+        url = self._generate_url(profile.vmanage_hostname, mount_point)
+        headers = {'Host': profile.domain_name,
+                   'Content-Type': 'application/json'}
+        payload = {
+                      "name":"zbfw",
+                      "type":"zoneBasedFW",
+                      "description":"zbfw",
+                      "definition":{
+                          "defaultAction":{
+                              "type":"pass"
+
+                  },
+                          "sequences":[
+                              {
+                                  "sequenceId":1,
+                                  "sequenceName":"Rule 1",
+                                  "baseAction":"inspect",
+                                  "sequenceType":"zoneBasedFW",
+                                  "match":{
+                                      "entries":[
+                                          {
+                                              "field":"sourceDataPrefixList",
+                                              "ref": str(srcNwRefId)
+
+                  },
+                                          {
+                                              "field":"destinationDataPrefixList",
+                                              "ref":str(destNwRefId)
+
+                  }
+
+                  ]
+
+                  },
+                                  "actions":[ ]
+
+                  }
+
+                  ],
+                          "entries":[
+                              {
+                                  "sourceZone": str(zoneListId),
+                                  "destinationZone":str(zoneListId)
+
+                  }
+
+                  ]
+
+                  }
+                  }
+        return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
 
     def delete_Intrusionpolicy(self, profile, expectation, definition_id):
         self.updateToken(profile)
@@ -549,7 +603,7 @@ class Policy(Basics):
         payload = {}
         return self.http_request(profile, 'DELETE', url, headers, json.dumps(payload), expectation=expectation)
 
-        
+
     def get_Lxc_install_status(self, profile, expectation):
         self.updateToken(profile)
         mount_point = 'client/activity/summary'
@@ -563,8 +617,8 @@ class Policy(Basics):
         url = self._generate_url(profile.vmanage_hostname, mount_point)
         headers = {'Host': profile.domain_name,
                    'Content-Type'   : 'application/json'}
-        payload = {  
-                    
+        payload = {
+
                     'commonName'    :    "Sdwan",
                     'org'           :    "Cisco",
                     'orgUnit'       :    "Cisco",
@@ -573,7 +627,7 @@ class Policy(Basics):
                     'country'       :    "US",
                     'validity'      :    10,
                     'email'         :    "test@cisco.com"
-                 } 
+                 }
         return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
 
 
@@ -584,13 +638,13 @@ class Policy(Basics):
         url = self._generate_url(profile.vmanage_hostname, mount_point)
         headers = {'Host': profile.domain_name,
                    'Content-Type'   : 'application/json'}
-        payload = {  
+        payload = {
                     'policyDescription'   :   "NbarAndFnF",
                     'policyType'          :   "feature",
                     'policyName'          :   "TestLocalizedPolicy",
                     'policyDefinition'    :   definition,
                     'isPolicyActivated'   :     'false'
-                 } 
+                 }
         return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
 
     def getlocalizedPolicy(self, profile, expectation):
@@ -624,8 +678,8 @@ class Policy(Basics):
                                         ]
                 }
         return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
-    
-    
+
+
     def createACLPolicy(self, profile, expectation,name,desc,sequence):
         self.updateToken(profile)
         mount_point = '/template/policy/definition/acl'
@@ -678,12 +732,12 @@ class Policy(Basics):
         headers = {'Host': profile.domain_name,
                    'Content-Type': 'application/json'}
         payload = {
-                    
+
                     "name"              :       name,
                     "type"              :       "appRoute",
                     "description"       :       desc,
                     "sequences"         :       sequence
-                    
+
                 }
         return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
 
@@ -701,7 +755,7 @@ class Policy(Basics):
         headers = {'Host': profile.domain_name,
                    'Content-Type': 'application/json'}
         payload = {
-                   
+
                     "name"          :       name,
                     "type"          :       "qosMap",
                     "description"   :       desc,
@@ -716,7 +770,7 @@ class Policy(Basics):
                                                                     "drops":"tail-drop",
                                                                     "classMapRef":""
                                                                 },
-                                                                {
+                                                               {
                                                                     "queue":"1",
                                                                     "bandwidthPercent":str(bandwidthPercent),
                                                                     "bufferPercent":str(bufferPercent),
@@ -770,7 +824,7 @@ class Policy(Basics):
                         "description"   :       desc,
                         "definition"    :       {
                                                     "vpnList": vpnListId,
-                                                     "subDefinitions":[ 
+                                                     "subDefinitions":[
                                                                          {
                                                                                 "name":"My Hub-and-Spoke",
                                                                                 "equalPreference":a,
@@ -780,7 +834,7 @@ class Policy(Basics):
                                                                          }
                                                                       ]
                                                 }
-                    
+
                 }
         return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
 
@@ -812,3 +866,41 @@ class Policy(Basics):
         headers = {'Host': profile.domain_name}
         return self.http_request(profile, 'DELETE', url, headers, None, expectation=expectation)
 
+    def get_ZoneList(self, profile, expectation):
+        self.updateToken(profile)
+        mount_point = 'template/policy/list/zone'
+        url = self._generate_url(profile.vmanage_hostname, mount_point)
+        headers = {'Host': profile.domain_name}
+        return self.http_request(profile, 'GET', url, headers, None, expectation=expectation)
+
+    def create_zonelist(self, profile, expectation, entries):
+        self.updateToken(profile)
+        mount_point = 'template/policy/list/zone'
+        url = self._generate_url(profile.vmanage_hostname, mount_point)
+        headers = {'Host': profile.domain_name,
+                   'Content-Type'   : 'application/json'}
+        payload = {
+                       "name"           :"ZBFWList",
+                        "description"   :"Desc Not Required",
+                        "type"          :"zone",
+                        "listId"        :None,
+                        "entries"       :entries
+
+                 }
+        return self.http_request(profile, 'POST', url, headers, json.dumps(payload), expectation=expectation)
+
+    def deleteZBFWList(self, profile, expectation,list_id):
+        self.updateToken(profile)
+        mount_point = 'template/policy/list/zone/{}'.format(list_id)
+        url = self._generate_url(profile.vmanage_hostname, mount_point)
+        headers = {'Host': profile.domain_name}
+        return self.http_request(profile, 'DELETE', url, headers, None, expectation=expectation)
+
+    def delete_Zbfw_policy(self, profile, expectation, definition_id):
+        self.updateToken(profile)
+        mount_point = 'template/policy/definition/zonebasedfw/{}'.format(definition_id)
+        url = self._generate_url(profile.vmanage_hostname, mount_point)
+        headers = {'Host': profile.domain_name,
+        'Content-Type': 'application/json'}
+        payload = {}
+        return self.http_request(profile, 'DELETE', url, headers, json.dumps(payload), expectation=expectation)
