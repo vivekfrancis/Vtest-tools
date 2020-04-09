@@ -1,8 +1,8 @@
 system_tb_host:
   tb_name: system3
   hostname: system-testbed3
-  ip: 10.104.36.38
-  underlay_ip: 192.168.1.30
+  ip: 10.104.45.88
+  underlay_ip: 192.168.1.31
   subnet: 192.168.1.0
   tb_username: tester
   system_vbond_hostname: {vbond: ['172.1.1.3']}
@@ -27,12 +27,16 @@ vmanage_session_config:
    provider_default_username : admin
    provider_default_password : admin
 
-ControlPolicy : Yes
+ControlPolicy         : Yes
 AppawareRoutingPolicy : Yes
-QoS: Yes
 #please enable either FEC or Packet Dup. Not both
 FEC: Yes
 PacketDup : 0
+#Localized policy
+QoS                   : Yes
+Nbar                  : Yes
+FnF                   : Yes
+VPN                   : "1"
 machines:
   vm7001:
     esx_server: 10.104.45.138
@@ -112,7 +116,7 @@ machines:
     nexthop1: 65.65.65.1
     Total_wan_intfs: 2
     Total_lan_intfs: 1
-    NAT : Yes
+    NAT : 0
   pm9007:
     interfaces:
       MGMT: {intf: [mgmt0], ip: 192.168.1.34, vpn: 512, type: mgmt}
@@ -179,6 +183,11 @@ machines:
     Total_wan_intfs: 2
     Total_lan_intfs: 1
     NAT : 0
+    VRFCount    :  10
+    VRFStart    :  10
+    IncrVRF     :  2
+    LANNetwork  : 10.10.1.0/24
+
   pm9009: #  Not done
     interfaces:
       MGMT: {intf: [GigabitEthernet0], ip: 192.168.1.38, vpn: 512, type: mgmt}
