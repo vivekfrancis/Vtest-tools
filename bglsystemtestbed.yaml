@@ -1,8 +1,8 @@
 system_tb_host:
   tb_name: system3
   hostname: system-testbed3
-  ip: 10.104.36.38
-  underlay_ip: 192.168.1.30
+  ip: 10.104.45.88
+  underlay_ip: 192.168.1.31
   subnet: 192.168.1.0
   tb_username: tester
   system_vbond_hostname: {vbond: ['172.1.1.3']}
@@ -29,10 +29,15 @@ vmanage_session_config:
 
 ControlPolicy : Yes
 AppawareRoutingPolicy : Yes
-QoS: Yes
 #please enable either FEC or Packet Dup. Not both
 FEC: Yes
 PacketDup : 0
+#Localized policy
+QoS : Yes
+ACL : Yes
+Nbar : Yes
+FnF : Yes
+VPN : "1"
 machines:
   vm7001:
     esx_server: 10.104.45.138
@@ -112,7 +117,7 @@ machines:
     nexthop1: 65.65.65.1
     Total_wan_intfs: 2
     Total_lan_intfs: 1
-    NAT : Yes
+    NAT : 0
   pm9007:
     interfaces:
       MGMT: {intf: [mgmt0], ip: 192.168.1.34, vpn: 512, type: mgmt}
@@ -179,6 +184,11 @@ machines:
     Total_wan_intfs: 2
     Total_lan_intfs: 1
     NAT : 0
+    VRFCount    :  10
+    VRFStart    :  10
+    IncrVRF     :  2
+    LANNetwork  : 10.10.1.0/24
+
   pm9009: #  Not done
     interfaces:
       MGMT: {intf: [GigabitEthernet0], ip: 192.168.1.38, vpn: 512, type: mgmt}
@@ -289,6 +299,54 @@ machines:
     Spoke : Yes
     Datapolicy : 0
     AppAwareroutingpolicy : 0
+  # pm9013:
+  #   interfaces:
+  #     MGMT: {intf: [mgmt0], ip: 192.168.1.42, vpn: 512, type: mgmt}
+  #     TRANSPORT: {intf: [ge0/1], ip: 57.57.57.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: biz-internet}
+  #     NETCONF: {intf: [mgmt0], ip: 192.168.1.42, vpn: 512, type: netconf}
+  #   service_side_ip: 173.19.20.2 # todo
+  #   service_side_intf: ge2/2 # todo
+  #   personality: cedge_isr_1100
+  #   system_ip: 100.100.100.12
+  #   location: 100
+  #   cgl: [1]
+  #   max_controllers: 1
+  #   site_id: 55
+  #   mos: 1
+  #   base_route_count: 1
+  #   spirent: True
+  #   Appqoe : 0
+  #   Securitypolicy : 0
+  #   LocalizedPolicy : 0
+  #   Hub : 0
+  #   Spoke : Yes
+  #   Datapolicy : 0
+  #   AppAwareroutingpolicy : 0
+
+  # pm9014:
+  #   interfaces:
+  #     MGMT: {intf: [GigabitEthernet0/0/2], ip: 192.168.1.14, vpn: 512, type: mgmt}
+  #     TRANSPORT: {intf: [GigabitEthernet0/0/1], ip: 61.61.61.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: default}
+  #     NETCONF: {intf: [GigabitEthernet0/0/2], ip: 192.168.1.14, vpn: 512, type: netconf}
+  #   service_side_ip: 173.19.20.2 # todo
+  #   service_side_intf: ge2/2 # todo
+  #   personality: cedge_curie_uranium
+  #   system_ip: 100.100.100.14
+  #   location: 100
+  #   cgl: [1]
+  #   max_controllers: 1
+  #   site_id: 14
+  #   mos: 1
+  #   base_route_count: 1
+  #   spirent: True
+  #   Appqoe : 0
+  #   Securitypolicy : 0
+  #   LocalizedPolicy : 0
+  #   Hub : 0
+  #   Spoke : Yes
+  #   Datapolicy : 0
+  #   AppAwareroutingpolicy : 0
+
   vm1001:
     esx_server: 10.104.45.198
     vm_name: vManage
