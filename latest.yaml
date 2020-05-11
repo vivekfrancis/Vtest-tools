@@ -1,0 +1,439 @@
+system_tb_host:
+  tb_name: system3
+  hostname: system-testbed3
+  ip: 10.104.36.38
+  underlay_ip: 192.168.1.30
+  subnet: 192.168.1.0
+  tb_username: tester
+  system_vbond_hostname: {vbond: ['172.1.1.3']}
+  ts_ip: 10.104.45.97
+#  root_ca : /tftpboot/cacert.pem
+#   ftp: {server_ip : 192.168.48.11, location: /srv/ftp}
+# #  dns_server: {mgmt_ip: 192.168.48.6, hostname: tester, password: djFwdGVsYTAyMTI=\n, ip: '22.22.22.2', ipv6: '1099::2'}
+# #  ztp_server: {mgmt_ip: 192.168.48.3, esx_server: 10.239.141.76, intf: [eth1], ip: 123.123.123.2, vpn: 0, type: transport, ipsec: True, color: default}
+#   bfd_color_timers: {biz-internet: {'multiplier': 5}, public-internet: {'hello-interval': 1500}, gold: {'multiplier': 10, 'hello-interval': 900}}
+#   dhcp_server_for_mgmt: 192.168.48.10
+#   bfd_app_route_timers: {multiplier: 3, poll-interval: 10000}
+#   WINDOWS-MACHINE-REMOTE-DESKTOP: 10.239.141.71
+
+SERVERS:
+    esxi-1: {ip: 10.104.45.138, guests: esxi-vsmarts, jumphost}
+    esxi-2: {ip: 10.104.45.198, guests: vManage}
+
+vmanage_session_config:
+   vmanage_hostname_to_ip :
+     vm1001 : 10.104.36.51
+   provider_domain_name : '10.104.36.51'
+   provider_default_username : admin
+   provider_default_password : admin
+
+ControlPolicy         : Yes
+AppawareRoutingPolicy : Yes
+#please enable either FEC or Packet Dup. Not both
+FEC: Yes
+PacketDup : 0
+#Localized policy
+QoS                   : Yes
+ACL                   : Yes
+Nbar                  : Yes
+FnF                   : Yes
+VPN                   : "1"
+machines:
+  vm7001:
+    esx_server: 10.104.45.138
+    vm_name: vSmart
+    interfaces:
+      0: {intf: [eth0], ip: 192.168.1.33, vpn: 512, type: mgmt}
+      1: {intf: [eth1], ip: 172.1.1.4, vpn: 0, type: transport, ipsec: True, color: default}
+      2: {intf: [eth0], ip: 192.168.1.33, vpn: 512, type: netconf}
+    personality: vsmart
+    tls_port: 23456
+    system_ip: 100.100.100.3
+    memsize: 4096
+    numvcpus: 2
+    cgid: 1
+    mos: 1
+    location: 100
+    site_id: 100
+  # vm7002:
+  #   esx_server: 10.104.45.138
+  #   vm_name: vSmart2
+  #   interfaces:
+  #     0: {intf: [eth0], ip: 192.168.1.70, vpn: 512, type: mgmt}
+  #     1: {intf: [eth1], ip: 172.1.1.70, vpn: 0, type: transport, ipsec: True, color: default}
+  #     2: {intf: [eth0], ip: 192.168.1.70, vpn: 512, type: netconf}
+  #   personality: vsmart
+  #   tls_port: 23456
+  #   system_ip: 100.100.100.70
+  #   memsize: 4096
+  #   numvcpus: 2
+  #   cgid: 1
+  #   mos: 1
+  #   location: 100
+  #   site_id: 101
+  vm6001:
+    esx_server: 10.104.45.138
+    vm_name: vBond
+    interfaces:
+      0: {intf: [eth0], ip: 192.168.1.32, vpn: 512, type: mgmt}
+      1: {intf: [ge0/0], ip: 172.1.1.3, vpn: 0, type: transport, ipsec: True, color: default}
+      2: {intf: [eth0], ip: 192.168.1.32, vpn: 512, type: netconf}
+    personality: vbond
+    system_ip: 100.100.100.2
+    memsize: 2048
+    numvcpus: 4
+    mos: 1
+    location: 100
+    site_id: 100
+  pm9006:
+    interfaces:
+      MGMT: {intf: [GigabitEthernet0], ip: 192.168.1.35, vpn: 512, type: mgmt}
+      TRANSPORT: {intf: [GigabitEthernet0/0/7], ip: 60.60.60.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: default}
+      SECOND_TRANSPORT: {intf: [GigabitEthernet0/0/4], ip: 65.65.65.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: biz-internet}
+      TRANSPORT0: {intf: [GigabitEthernet0/0/7], ip: 60.60.60.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: default}
+      TRANSPORT1: {intf: [GigabitEthernet0/0/4], ip: 65.65.65.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: biz-internet}
+      NETCONF: {intf: [GigabitEthernet0], ip: 192.168.1.35, vpn: 512, type: netconf}
+    service_side_ip: 173.17.10.2
+    service_side_intf: GigabitEthernet0/0/6
+    personality: cedge_asr_1002HX
+    system_ip: 100.100.100.5
+    location: 100
+    cgl: [1]
+    max_controllers: 1
+    site_id: 60
+    mos: 1
+    base_route_count: 1
+    spirent: True
+    Appqoe : 0
+    Securitypolicy : 0
+    LocalizedPolicy : 0
+    Hub : Yes
+    Spoke : 0
+    Datapolicy : 0
+    AppAwareroutingpolicy : 0
+    prefix0 : 0.0.0.0/0
+    prefix1 : 0.0.0.0/0
+    nexthop0: 60.60.60.1
+    nexthop1: 65.65.65.1
+    Total_wan_intfs: 2
+    Total_lan_intfs: 1
+    NAT : Yes
+    VRFCount    :  50
+    VRFStart    :  1
+    IncrVRF     :  2
+    LANNetwork  : 10.11.1.0/24
+  pm9007:
+    interfaces:
+      MGMT: {intf: [mgmt0], ip: 192.168.1.34, vpn: 512, type: mgmt}
+      TRANSPORT: {intf: [ge0/1], ip: 51.51.51.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: default}
+      SECOND_TRANSPORT: {intf: [ge0/0], ip: 50.50.50.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: biz-internet}
+      TRANSPORT0: {intf: [ge0/1], ip: 51.51.51.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: default}
+      TRANSPORT1: {intf: [ge0/0], ip: 50.50.50.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: biz-internet}
+      NETCONF: {intf: [mgmt0], ip: 192.168.1.34, vpn: 512, type: netconf}
+    service_side_ip: 173.20.10.2
+    service_side_intf: ge0/6
+    personality: vedge_1k
+    system_ip: 100.100.100.7
+    location: 100
+    cgl: [1]
+    max_controllers: 1
+    site_id: 110
+    mos: 1
+    base_route_count: 1
+    spirent: False
+    Appqoe : 0
+    Securitypolicy : 0
+    LocalizedPolicy : 0
+    prefix0 : 0.0.0.0/0
+    prefix1 : 0.0.0.0/0
+    nexthop0: 51.51.51.1
+    nexthop1: 50.50.50.1
+    Total_wan_intfs: 2
+    Total_lan_intfs: 1
+    Hub : 0
+    Spoke : 0
+    Datapolicy : 0
+    AppAwareroutingpolicy : 0
+    NAT : 0
+  pm9008:
+    interfaces:
+      MGMT: {intf: [GigabitEthernet0], ip: 192.168.1.36, vpn: 512, type: mgmt}
+      TRANSPORT: {intf: [GigabitEthernet0/0/7], ip: 90.90.90.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: default}
+      SECOND_TRANSPORT: {intf: [GigabitEthernet0/0/1], ip: 95.95.95.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: biz-internet}
+      TRANSPORT0: {intf: [GigabitEthernet0/0/7], ip: 90.90.90.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: default}
+      TRANSPORT1: {intf: [GigabitEthernet0/0/1], ip: 95.95.95.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: biz-internet}
+      NETCONF: {intf: [GigabitEthernet0], ip: 192.168.1.36, vpn: 512, type: netconf}
+    service_side_ip: 173.19.10.2
+    service_side_intf: GigabitEthernet0/0/0
+    personality: cedge_asr_1002HX
+    system_ip: 100.100.100.4
+    location: 100
+    cgl: [1]
+    max_controllers: 1
+    site_id: 90
+    mos: 1
+    base_route_count: 1
+    spirent: False
+    Appqoe : Yes
+    Securitypolicy : 0
+    LocalizedPolicy : Yes
+    Hub : 0
+    Spoke : 0
+    Datapolicy : Yes
+    AppAwareroutingpolicy : 0
+    prefix0 : 0.0.0.0/0
+    prefix1 : 0.0.0.0/0
+    nexthop0: 90.90.90.1
+    nexthop1: 95.95.95.1
+    Total_wan_intfs: 2
+    Total_lan_intfs: 1
+    NAT : 0
+    VRFCount    :  5
+    VRFStart    :  1
+    IncrVRF     :  1
+    LANNetwork  : 10.11.1.0/24
+
+  pm9009: #  Not done
+    interfaces:
+      MGMT: {intf: [GigabitEthernet0], ip: 192.168.1.38, vpn: 512, type: mgmt}
+      TRANSPORT: {intf: [GigabitEthernet0/0/0], ip: 30.30.30.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: default}
+      TRANSPORT0: {intf: [GigabitEthernet0/0/0], ip: 30.30.30.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: default}
+      #SECOND_TRANSPORT: {intf: [GigabitEthernet0/1/0], ip: 35.35.35.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: biz-internet}
+      NETCONF: {intf: [GigabitEthernet0], ip: 192.168.1.38, vpn: 512, type: netconf}
+    service_side_ip: 173.19.50.2
+    service_side_intf: GigabitEthernet0/0/1 # todo
+    personality: cedge_isr_4351
+    system_ip: 100.100.100.6
+    location: 100
+    cgl: [1]
+    max_controllers: 1
+    site_id: 30
+    mos: 1
+    base_route_count: 1
+    spirent: True
+    nexthop0: 30.30.30.1
+    Total_wan_intfs: 1
+    Total_lan_intfs: 1
+    prefix0 : 0.0.0.0/0
+    Appqoe : Yes
+    Securitypolicy : 0
+    LocalizedPolicy : Yes
+    Hub : 0
+    Spoke : Yes
+    Datapolicy : Yes
+    AppAwareroutingpolicy : Yes
+    NAT : Yes
+    VRFCount    :  10
+    VRFStart    :  1
+    IncrVRF     :  1
+    LANNetwork  : 10.10.1.0/24
+  pm9010:
+    interfaces:
+      MGMT: {intf: [GigabitEthernet0], ip: 192.168.1.45, vpn: 512, type: mgmt}
+      TRANSPORT: {intf: [GigabitEthernet0/0/0], ip: 46.46.46.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: biz-internet}
+      TRANSPORT0: {intf: [GigabitEthernet0/0/0], ip: 46.46.46.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: biz-internet}
+      TRANSPORT1: {intf: [GigabitEthernet0/0/1], ip: 45.45.45.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: default}
+      NETCONF: {intf: [GigabitEthernet0], ip: 192.168.1.45, vpn: 512, type: netconf}
+    service_side_ip: 173.20.10.2
+    service_side_intf: GigabitEthernet0/0/2
+    personality: cedge_isr_4461
+    system_ip: 100.100.100.45
+    location: 100
+    cgl: [1]
+    max_controllers: 1
+    site_id: 45
+    mos: 1
+    base_route_count: 1
+    spirent: False
+    Total_wan_intfs: 2
+    Total_lan_intfs: 1
+    prefix0 : 0.0.0.0/0
+    prefix1 : 0.0.0.0/0
+    nexthop0: 46.46.46.1
+    nexthop1: 45.45.45.1
+    Appqoe : Yes
+    Securitypolicy : 0
+    LocalizedPolicy : 0
+    Hub : 0
+    Spoke : Yes
+    Datapolicy : Yes
+    AppAwareroutingpolicy : 0
+    NAT : 0
+    VRFCount    :  10
+    VRFStart    :  10
+    IncrVRF     :  2
+    LANNetwork  : 10.11.1.0/24
+  pm9011:
+    interfaces:
+      MGMT: {intf: [mgmt0], ip: 192.168.1.40, vpn: 512, type: mgmt}
+      TRANSPORT0: {intf: [ge2/0], ip: 75.75.75.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: default}
+      TRANSPORT1: {intf: [ge0/0], ip: 70.70.70.2, mask: 24, vpn: 0, type: transport, ipsec: True, NAT: True, color: biz-internet}
+      NETCONF: {intf: [mgmt0], ip: 192.168.1.40, vpn: 512, type: netconf}
+    service_side_ip: 173.18.10.2
+    service_side_intf: ge2/1
+    personality: vedge_2k
+    system_ip: 100.100.100.11
+    location: 100
+    cgl: [1]
+    max_controllers: 1
+    site_id: 111
+    mos: 1
+    base_route_count: 1
+    spirent: True
+    Total_wan_intfs: 2
+    Total_lan_intfs: 1
+    prefix0 : 0.0.0.0/0
+    prefix1 : 0.0.0.0/0
+    nexthop0: 75.75.75.1
+    nexthop1: 70.70.70.1
+    Appqoe : 0
+    Securitypolicy : 0
+    LocalizedPolicy : True
+    Hub : 0
+    Spoke : Yes
+    Datapolicy : True
+    AppAwareroutingpolicy : True
+    EnableTCPOpt: True
+    NAT : 0
+    VRFCount    :  1
+  pm9012:
+    interfaces:
+      MGMT: {intf: [mgmt0], ip: 192.168.1.41, vpn: 512, type: mgmt}
+      TRANSPORT0: {intf: [ge1/1], ip: 56.56.56.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: default}
+      #TRANSPORT: {intf: [ge1/0], ip: 55.55.55.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: biz-internet}
+      TRANSPORT1: {intf: [ge1/0], ip: 55.55.55.2, mask: 24, vpn: 0, type: transport, ipsec: True, color: biz-internet}
+      NETCONF: {intf: [mgmt0], ip: 192.168.1.41, vpn: 512, type: netconf}
+    service_side_ip: 173.19.20.2 # todo
+    service_side_intf: ge2/2 # todo
+    personality: vedge_2k
+    system_ip: 100.100.100.12
+    location: 100
+    cgl: [1]
+    max_controllers: 1
+    site_id: 55
+    mos: 1
+    base_route_count: 1
+    spirent: True
+    Appqoe : 0
+    Securitypolicy : 0
+    LocalizedPolicy : 0
+    Hub : 0
+    Spoke : Yes
+    Datapolicy : 0
+    AppAwareroutingpolicy : 0
+    prefix0 : 0.0.0.0/0
+    nexthop0: 55.55.55.1
+    prefix0 : 0.0.0.0/0
+    nexthop0: 56.56.56.1
+    Total_wan_intfs: 2
+    NAT : Yes
+    VRFCount    :  1
+    VRFStart    :  10
+    IncrVRF     :  2
+    LANNetwork  : 10.11.1.0/24
+    EnableTCPOpt: True
+  vm1001:
+    esx_server: 10.104.45.198
+    vm_name: vManage
+    esxi_ip: 10.104.45.198
+    interfaces:
+      0: {intf: [eth1], ip: 10.104.36.51, vpn: 512, type: mgmt}
+      1: {intf: [eth0], ip: 173.1.1.2, vpn: 0, type: transport, ipsec: True, color: default}
+      2: {intf: [eth1], ip: 10.104.36.51, vpn: 512, type: netconf}
+    personality: vmanage
+    system_ip: 100.100.100.1
+    memsize: 32768
+    numvcpus: 16
+    location: 100
+    site_id: 100
+    mos: 1
+    gui_default_username: "admin"
+    gui_default_password: "admin"
+
+spirent:
+   install_dir: /home/tester/Spirent_TestCenter_4.99/Spirent_TestCenter_Application_Linux/
+   chassis_ip: 10.104.45.162
+   server_ip: 10.104.36.54
+   vstc_ip: 10.104.36.54
+   perform_basic_setup: False
+   ports:
+       # 0: {slot: 3, port: 1, ip: 173.19.10.1, mask: 24, gateway: 173.19.10.2, type: EthernetCopper} # pm 9008
+       # 1: {slot: 3, port: 2, ip: 173.19.20.1, mask: 24, gateway: 173.19.20.2, type: EthernetCopper} # pm 9012
+       # 2: {slot: 3, port: 3, ip: 173.20.10.1, mask: 24, gateway: 173.20.10.2, type: EthernetCopper} # pm 9007
+       # 3: {slot: 10, port: 6, ip: 173.17.10.1, mask: 24, gateway: 173.17.10.2, type: EthernetCopper} # pm 9006
+       # 4: {slot: 10, port: 1, ip: 173.18.10.1, mask: 24, gateway: 173.18.10.2, type: EthernetCopper} # pm 9011
+       # 5: {slot: 10, port: 4, ip: 173.21.10.1, mask: 24, gateway: 173.21.10.2, type: EthernetCopper} # pm 9009
+       0: {slot: 3, port: 1, ip: 173.19.10.1, mask: 24, gateway: 173.19.10.2, type: EthernetCopper} # pm 9008
+       1: {slot: 3, port: 2, ip: 173.19.20.1, mask: 24, gateway: 173.19.20.2, type: EthernetCopper} # pm 9012
+       2: {slot: 3, port: 3, ip: 173.20.10.1, mask: 24, gateway: 173.20.10.2, type: EthernetCopper} # pm 9007
+       3: {slot: 10, port: 6, ip: 173.17.10.1, mask: 24, gateway: 173.17.10.2, type: EthernetCopper} # pm 9006
+       4: {slot: 10, port: 1, ip: 173.18.10.1, mask: 24, gateway: 173.18.10.2, type: EthernetCopper} # pm 9011
+       5: {slot: 10, port: 4, ip: 173.21.10.1, mask: 24, gateway: 173.21.10.2, type: EthernetCopper} # pm 9009
+
+   type: EthernetCopper
+#
+# SPIRENT_internal_reference_only:
+#     0: {slot: 4, port: 9,  pm9006: GigabitEthernet0/0/1.101}
+#     1: {slot: 4, port: 10,  pm9007: GigabitEthernet0/0/1.102}
+
+# cisco:
+#   C3750:
+#     MGMT: {intf: [], ip: 192.168.22.131, type: mgmt}
+#   ST-Mgmt-Switch:
+#     MGMT: {intf: [], ip: 192.168.22.132, type: mgmt}
+#
+# ubuntu:
+#   ubuntu-services:
+#     esx_server: 10.104.45.138
+#     MGMT: {intf: eth0, ip: 10.104.36.38, type: mgmt, hostname: tester, password: v1ptela0212}
+
+Ixia:
+   ports:
+     1: [{chassis: 1, slot: 12, port: 5}] # traffic-switchport: 15
+     2: [{chassis: 1, slot: 12, port: 6}] # traffic-switchport: 16
+   chassis_ip: 10.104.45.240
+   ixload_client_ip: 10.104.36.39
+   ixload_version: 8.40.115.169
+
+events:
+  events-log:
+    log_location: '/vtest/addons/system_stress_events/'
+  events-vedge:
+    config:
+      flip_all_transport_interface: 'cb.se_system_stress'
+      flip_standby_transport_interface: 'cb.se_system_stress'
+    clear:
+      request_security_rekey: 'confd'
+      clear_omp_all: 'confd'
+      clear_omp_routes: 'confd'
+      clear_interface_statistics: 'confd'
+      clear_tunnel_statistics: 'vs'
+      clear_acl_statistics: 'vs'
+      clear_control_connections: 'confd'
+      clear_system_statistics: 'vs'
+      clear_arp: 'confd'
+      clear_notification: 'confd'
+      flap_standby_tunnel_interface: 'cb.se_system_stress'
+      flap_all_tunnel_interface: 'cb.se_system_stress'
+  events-vsmart:
+    config:
+      flip_all_transport_interface: 'cb.se_system_stress'
+      flip_standby_transport_interface: 'cb.se_system_stress'
+    clear:
+      clear_omp_all: 'confd'
+      clear_omp_routes: 'confd'
+      clear_tunnel_statistics: 'vs'
+      clear_system_statistics: 'vs'
+      clear_acl_statistics: 'vs'
+      clear_control_connections: 'confd'
+      clear_interface_statistics: 'confd'
+      clear_arp: 'confd'
+      clear_notification: 'confd'
+      flap_standby_tunnel_interface: 'cb.se_system_stress'
+      flap_all_tunnel_interface: 'cb.se_system_stress'
+  events-vbond:
+    config:
+    clear:
+  events-vmanage:
+    config:
+clear:
