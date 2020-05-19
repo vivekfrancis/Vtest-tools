@@ -93,6 +93,7 @@ class appqoe_system(object):
         global ubuntu_server, ubuntu_username
         ubuntu_server = self.topology.get_system_testbed_ip()
         ubuntu_username = self.topology.get_system_testbed_username()
+        pm_vedges = self.topology.pm_vedge_list()
 
         global profile, DEVICE_TYPE,vman_session,hostname
         try:
@@ -127,15 +128,23 @@ class appqoe_system(object):
         createMulipleACLSequences = True
 
         DEVICE_TYPE = {}
-        DEVICE_TYPE['pm9006']   = 'vedge-ASR-1002-HX'
-        DEVICE_TYPE['pm9008']   = 'vedge-ASR-1002-HX'
-        DEVICE_TYPE['pm9007']   = 'vedge-1000'
-        DEVICE_TYPE['pm9011']   = 'vedge-2000'
-        DEVICE_TYPE['pm9009']   = 'vedge-ISR-4351'
-        DEVICE_TYPE['pm9010']   = 'vedge-ISR-4461'
-        DEVICE_TYPE['pm9012']   = 'vedge-2000'
+        for device in pm_vedges:
+            DEVICE_TYPE[device]   = self.get_device_type_for_cdges(device)
+        global DEVICE_TYPE
 
     #---------------------------------------------------------------------------
+
+    def get_device_type_for_cdges(self,device):
+        devicetype = ''
+        res = vman_session.config.dev.get_all_vedge_status(profile, None)
+        if res.status_code == 200:
+            vedge_response = json.loads(res.content)['data']
+            for vedge in vedge_response:
+                if vedge['deviceIP'] == self.topology.system_ip(device):
+                    devicetype  = str(vedge['deviceModel'])
+                    self.logger.info(devicetype)
+                    return devicetype
+
     #@run.test(['test_create_cli_templates_for_devices'])
     def test_create_cli_templates_for_devices(self,device):
             failcount = 0
@@ -1099,7 +1108,15 @@ class appqoe_system(object):
                     else:
                         flag = flag + 1
                         self.logger.info('Appqoe is not configured')
+                    appqoeresult = self.test_verify_Appqoe_configs_poll(device)
 
+                    if appqoeresult[0]:
+                        table_result.append(['Appqoe SN status: Alive','PASS'])
+                        self.logger.info('Appqoe SN status is PASSED')
+                    else:
+                        table_result.append(['Appqoe SN status','FAIL'])
+                        self.logger.info('Appqoe SN status: is FAILED')
+                        flag = flag + 1
                 uuid = http.get_device_property_from_key( "uuid", 'host-name', device)
                 system_ip = self.topology.system_ip(device)
                 #Get bfd sessions output before reboot
@@ -4686,6 +4703,15 @@ class appqoe_system(object):
             dictionary[key]=int(value)
         return dictionary
 
+    def key_value_dict_str(self, line, dictionary):
+        match = re.match(r'.*:.*', line)
+        if match:
+            line = line.split(':')
+            key = line[0].strip()
+            value = line[1].strip()
+            dictionary[key]=value
+        return dictionary
+
     # @run.test(['verifyURLFStats'])
     def verifyURLFStats(self,device,key='Whitelist Hit Count'):
         cmd = 'show utd engine standard statistics url-filtering | inc {}'.format(key)
@@ -4759,11 +4785,12 @@ class appqoe_system(object):
     @run.test(['test_Appqoe_template_push'])
     def test_Appqoe_template_push(self):
         flag = 0
-        pm_vedges = ['pm9009']
+        pm_vedges = ['pm9010']
         table_result = []
         Iteration = 1
-        ixL.load_ixia()
-        ixL.reassign_ports()
+        attachFail     = []
+        # ixL.load_ixia()
+        # ixL.reassign_ports()
         for i in range(Iteration):
             for device in pm_vedges:
                 table_result.append(['RESULT SUMMARY FOR: '+str(device),'ITERATION: '+str(i)])
@@ -4829,7 +4856,8 @@ class appqoe_system(object):
                     table_result.append(['Appqoe SN status','FAIL'])
                     self.logger.info('Appqoe SN status: is FAILED')
                     flag = flag + 1
-                ixL.start_ix_traffic()
+                import pdb; pdb.set_trace()
+                # ixL.start_ix_traffic()
                 tcp_proxy_statistics = self.test_tcpProxy_Statistics(device)
 
                 if tcp_proxy_statistics[0]:
@@ -4895,8 +4923,8 @@ class appqoe_system(object):
                     flag = flag + 1
 
                 time.sleep(5)
-                ixL.stop_ixload_traffic()
-                ixL.cleanup_ix_traffic()
+                # ixL.stop_ixload_traffic()
+                # ixL.cleanup_ix_traffic()
                 try:
                     crashlogres = vman_session.dashboard.device_crashlog(profile, None,system_ip)
                     if crashlogres.status_code == 200:
@@ -6429,9 +6457,9 @@ class appqoe_system(object):
         sppi_stats = {}
         vpath_stats = {}
         for line in parsed_output[sppi_stats_index+1:vpath_stats_index]:
-            self.key_value_dict(line, sppi_stats)
+            self.key_value_dict_str(line, sppi_stats)
         for line in parsed_output[vpath_stats_index+1:]:
-            self.key_value_dict(line, vpath_stats)
+            self.key_value_dict_str(line, vpath_stats)
         appqoe_libuinet_stats = sppi_stats, vpath_stats
         if vpath_stats['Packets In'] == 0:
             flag = flag + 1
@@ -6565,6 +6593,11 @@ class appqoe_system(object):
             return [True,'Matching Flows found']
         else:
             return [False,'No Matching Flows found']
+
+    @run.test(['test_demo'])
+    def test_demo(self,device='pm9009'):
+        import pdb; pdb.set_trace()
+        uuid = http.get_device_property_from_key( "uuid", 'host-name', device)
 
     def get_config(self,res):
         data = res.content
