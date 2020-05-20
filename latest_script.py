@@ -728,7 +728,7 @@ class appqoe_system(object):
 
             print(range(len(vpnRefIds)))
             print(range(len(datapolicyRefIds)))
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
             for i in range(len(vpnRefIds)):
                 policyDefinition['assembly'].append({
                                                     'definitionId' : datapolicyRefIds[i],
@@ -4789,8 +4789,8 @@ class appqoe_system(object):
         table_result = []
         Iteration = 1
         attachFail     = []
-        # ixL.load_ixia()
-        # ixL.reassign_ports()
+        ixL.load_ixia()
+        ixL.reassign_ports()
         for i in range(Iteration):
             for device in pm_vedges:
                 table_result.append(['RESULT SUMMARY FOR: '+str(device),'ITERATION: '+str(i)])
@@ -4856,8 +4856,8 @@ class appqoe_system(object):
                     table_result.append(['Appqoe SN status','FAIL'])
                     self.logger.info('Appqoe SN status: is FAILED')
                     flag = flag + 1
-                import pdb; pdb.set_trace()
-                # ixL.start_ix_traffic()
+                # import pdb; pdb.set_trace()
+                ixL.start_ix_traffic()
                 tcp_proxy_statistics = self.test_tcpProxy_Statistics(device)
 
                 if tcp_proxy_statistics[0]:
@@ -4910,21 +4910,21 @@ class appqoe_system(object):
                     self.logger.info('Test Verify appqoe libuinet stats is FAILED ')
                     flag = flag + 1
 
-                vrf = self.show_vrf_details(device)
-                vrfvalue = vrf['1']
-                test_appqoe_flows = self.verify_sdwan_appqoe_flows(device, vrfvalue=vrfvalue, server_port='80')
-
-                if test_appqoe_flows[0]:
-                    table_result.append(['Appqoe flows verification: ', 'PASS'])
-                    self.logger.info('Appqoe flows verification is PASSED ')
-                else:
-                    table_result.append(['Appqoe flows verification ', 'FAIL'])
-                    self.logger.info('Appqoe flows verification is FAILED ')
-                    flag = flag + 1
+                # vrf = self.show_vrf_details(device)
+                # vrfvalue = vrf['1']
+                # test_appqoe_flows = self.verify_sdwan_appqoe_flows(device, vrfvalue=vrfvalue, server_port='80')
+                #
+                # if test_appqoe_flows[0]:
+                #     table_result.append(['Appqoe flows verification: ', 'PASS'])
+                #     self.logger.info('Appqoe flows verification is PASSED ')
+                # else:
+                #     table_result.append(['Appqoe flows verification ', 'FAIL'])
+                #     self.logger.info('Appqoe flows verification is FAILED ')
+                #     flag = flag + 1
 
                 time.sleep(5)
-                # ixL.stop_ixload_traffic()
-                # ixL.cleanup_ix_traffic()
+                ixL.stop_ixload_traffic()
+                ixL.cleanup_ix_traffic()
                 try:
                     crashlogres = vman_session.dashboard.device_crashlog(profile, None,system_ip)
                     if crashlogres.status_code == 200:
@@ -5559,6 +5559,8 @@ class appqoe_system(object):
         BRRouter = 'pm9009'
         DCRouter = 'pm9010'
         attachFail     = []
+        ixL.load_ixia()
+        ixL.reassign_ports()
         for i in range(Iteration):
             for device in pm_vedges:
                 table_result.append(['RESULT SUMMARY FOR: '+str(device),'ITERATION: '+str(i)])
@@ -5581,13 +5583,15 @@ class appqoe_system(object):
                 time.sleep(10)
                 system_ip = self.topology.system_ip(device)
                 res = vman_session.maint.dev_reboot.get_bfd_summary(profile, None,system_ip)
-                if res.status_code == 200:
-                        time.sleep(5)
-                        bfdSessionsUpbeforeReboot = json.loads(res.content)['data'][0]['bfd-sessions-up']
-                        self.logger.info('Bfd Sessions up before test: [%s]' % bfdSessionsUpbeforeReboot)
-                else:
-                        table_result.append(['Failed to fetch BFD Sessions before test: ', 'FAIL'])
-                    #Get omp peer check summary before test
+                # if res.status_code == 200:
+                #     time.sleep(5)
+                #     bfdSessionsUpbeforeReboot = json.loads(res.content)['data'][0]['bfd-sessions-up']
+                #     self.logger.info('Bfd Sessions up before test: [%s]' % bfdSessionsUpbeforeReboot)
+                #     table_result.append(['Fetch BFD Sessions before test: ', 'PASS']
+                # else:
+                #     table_result.append(['Failed to fetch BFD Sessions before test: ', 'FAIL'])
+                #Get omp peer check summary before test
+
                 res = vman_session.maint.dev_reboot.get_omp_summary(profile, None,system_ip)
                 if res.status_code == 200:
                         tlocSentbeforeReboot      =  json.loads(res.content)['data'][0]['tlocs-sent']
@@ -5598,6 +5602,7 @@ class appqoe_system(object):
                         self.logger.info('tloc sent before test: [%s]' % tlocRecievedbeforeReboot)
                         self.logger.info('tloc sent before test: [%s]' % vSmartpeerbeforeReboot)
                         self.logger.info('tloc sent before test: [%s]' % operStatebeforeReboot)
+                        table_result.append(['Fetch OMP peer Sessions before test: ', 'PASS'])
 
                 else:
                         table_result.append(['Failed to fetch OMP peer Sessions before test: ', 'FAIL'])
@@ -5772,7 +5777,6 @@ class appqoe_system(object):
 
             # Hardsleep for 3 min for CSR to get generated on device
             time.sleep(150)
-            import pdb; pdb.set_trace()
             #******** cli checks ***********
             for device in pm_vedges:
                 self.logger.info('Starting TCP opt status Verification')
@@ -5786,8 +5790,6 @@ class appqoe_system(object):
                     self.logger.info('Test TCP proxy running status is FAILED')
                     flag = flag + 1
 
-
-                #table.add_rows([['TCPOpt_Status','tcp_opt_status[0]']])
                 self.logger.info('Starting Appqoe config Verification')
                 appqoeresult = self.test_verify_Appqoe_configs_poll(device)
 
@@ -5799,7 +5801,6 @@ class appqoe_system(object):
                     self.logger.info('Appqoe SN status: is FAILED')
                     flag = flag + 1
 
-                #table.add_rows([['Appqoe_Status','appqoeresult[0]']])
                 self.logger.info('Starting UTD config Verification')
                 utdresult = self.test_verify_UTD_configs_poll(device)
 
@@ -5833,7 +5834,6 @@ class appqoe_system(object):
                     self.logger.info('Test UTD running status is FAILED')
                     flag = flag + 1
 
-                # pdb.set_trace()
                 IPScokets = self.test_verify_IP_Sockets(device)
                 if IPScokets[0]:
                     table_result.append(['IP sockets are available: ', 'PASS'])
@@ -5841,7 +5841,6 @@ class appqoe_system(object):
                     table_result.append(['IP sockets are not available: ', 'FAIL'])
                     flag = flag + 1
                 sslProxyOpState = self.test_sslproxystats(device,'SSL Proxy Operational State','RUNNING')
-                import pdb; pdb.set_trace()
 
                 if sslProxyOpState[0]:
                     table_result.append(['SSlProxy operational state is running ', 'PASS'])
@@ -5881,12 +5880,10 @@ class appqoe_system(object):
                     self.logger.info('Test Clear TCP proxy statistics is FAILED')
                     flag = flag + 1
                 #********  Starts the Traffic *****************
-                # self.logger.info('Starting Ixload Traffic Initialization')
-                # ixL.reassign_ports()
-                # ixL.start_ix_traffic()
-                # self.logger.info('Traffic is running')
-                # time.sleep(60)
-                # table_result.append(['Test Ixload Traffic Start: ', 'PASS'])
+                self.logger.info('Starting Ixload Traffic Initialization')
+                ixL.start_ix_traffic()
+                self.logger.info('Traffic is running')
+                table_result.append(['Test Ixload Traffic Start: ', 'PASS'])
                 #********  ADD TRAFFIC CODE HERE *****************
                 self.logger.info('Starting TCP proxy statistics Verification:')
                 tcp_proxy_statistics = self.test_tcpProxy_Statistics(device)
@@ -6013,6 +6010,7 @@ class appqoe_system(object):
                 except:
                     pass
                     self.logger.info('Caught an exception on fetching hardware errors on iteration: {}'.format(i))
+
         table.add_rows(table_result)
         print table.draw()
         if flag == 0:
@@ -6594,6 +6592,167 @@ class appqoe_system(object):
         else:
             return [False,'No Matching Flows found']
 
+
+    @run.test(['test_Appqoe_Tcp_opt_only_template_push'])
+    def test_Appqoe_Tcp_opt_only_template_push(self):
+        flag = 0
+        pm_vedges = ['pm9009']
+        table_result = []
+        Iteration = 1
+        attachFail     = []
+        ixL.load_ixia()
+        ixL.reassign_ports()
+        for i in range(Iteration):
+            for device in pm_vedges:
+                table_result.append(['RESULT SUMMARY FOR: '+str(device),'ITERATION: '+str(i)])
+                version = self.test_show_version(device)
+                print version
+                table_result.append(['sdwan version: '+str(version[1]),''])
+                table_result.append(['',''])
+                self.logger.info('Clean up of existing policy/template configuration process is initiated')
+                editStatus = self.test_edit_device_template_Remove_policies(device)
+                if editStatus[0]:
+                    table_result.append(['Test remove existing Security and Localized policy:' , 'PASS'])
+                    self.logger.info('Test remove existing Security and Localized policy: PASSED')
+                else:
+                    table_result.append(['Test remove existing Security and Localized policy: ', 'FAIL'])
+                    self.logger.info('Test remove existing Security and Localized policy: FAILED')
+                    flag = flag + 1
+                time.sleep(10)
+            #***Detach template from devices if any *****
+            self.logger.info('Detaching templates for Cedge')
+            detach = self.test_detach_templates_from_devices(pm_vedges)
+            if detach:
+                table_result.append(['Test cEdge Detach Templates: ', 'PASS'])
+                self.logger.info('Test cEdge Detach Templates is PASSED')
+            else:
+                table_result.append(['Test cEdge Detach Templates: ', 'FAIL'])
+                self.logger.info('Test cEdge Detach Templates is FAILED')
+                flag = flag + 1
+
+            #*****detail to be given in yaml*********
+            for device in pm_vedges:
+                time.sleep(5)
+                print(device)
+
+                createResult = self.test_create_Device_template(device)
+                if createResult[0]:
+                    table_result.append(['Created Master templates ', 'PASS'])
+                    self.logger.info('Create Master templates is PASSED')
+                else:
+                    table_result.append(['Failed to create Master templates: ', 'FAIL'])
+                    self.logger.info('Failed to create Master templates is FAILED')
+                    flag = flag + 1
+
+                attachresult = self.test_Edit_And_Attach_Device_template(device)
+                if attachresult[0]:
+                    table_result.append(['Test Feature template Edit and Attach: ', 'PASS'])
+                    self.logger.info('Test Feature template Edit and Attach is PASSED')
+                else:
+                    table_result.append(['Test Feature template Edit and Attach: ', 'FAIL'])
+                    self.logger.info('Test Feature template Edit and Attach is FAILED')
+                    attachFail.append(device)
+                    flag = flag + 1
+            #     time.sleep(180)
+            #******** cli checks ***********
+
+            for device in pm_vedges:
+                self.logger.info('Starting Appqoe config Verification')
+                appqoeresult = self.test_verify_Appqoe_configs_poll(device)
+
+                if appqoeresult[0]:
+                    table_result.append(['Appqoe SN status: Alive','PASS'])
+                    self.logger.info('Appqoe SN status is PASSED')
+                else:
+                    table_result.append(['Appqoe SN status','FAIL'])
+                    self.logger.info('Appqoe SN status: is FAILED')
+                    flag = flag + 1
+                # import pdb; pdb.set_trace()
+                ixL.start_ix_traffic()
+                tcp_proxy_statistics = self.test_tcpProxy_Statistics(device)
+
+                if tcp_proxy_statistics[0]:
+                    table_result.append(['Test Verify TCP proxy statistics: ', 'PASS'])
+                    self.logger.info('Test Verify TCP proxy statistics is PASSED')
+                else:
+                    table_result.append(['Test Verify TCP proxy statistics: ', 'FAIL'])
+                    self.logger.info('Test Verify TCP proxy statistics is FAILED')
+                    flag = flag + 1
+
+                self.logger.info('Starting Qft status Verification:')
+                appqoe_qft_status = self.test_appqoe_qfp_active_stats(device)
+
+                if appqoe_qft_status[0]:
+                    table_result.append(['Test QfP status: ', 'PASS'])
+                    self.logger.info('Test QfP status is PASSED ')
+                else:
+                    table_result.append(['Test QfP status: ', 'FAIL'])
+                    self.logger.info('Test QfP status is FAILED')
+                    flag = flag + 1
+
+                self.logger.info('Starting RM resources Verification:')
+                appqoe_rm_resuorce_status = self.test_appqoe_RM_resources(device)
+
+                if appqoe_rm_resuorce_status[0]:
+                    table_result.append(['Test Verify RM resources: ', 'PASS'])
+                    self.logger.info('Test Verify RM resources is PASSED ')
+                else:
+                    table_result.append(['Test Verify RM resources: ', 'FAIL'])
+                    self.logger.info('Test Verify RM resources is FAILED ')
+                    flag = flag + 1
+
+                appqoe_nat_stats = self.appqoe_nat_statistics(device)
+
+                if appqoe_nat_stats[0]:
+                    table_result.append(['Test Verify sdwan appqoe NAT stats: ', 'PASS'])
+                    self.logger.info('Test Verify sdwan appqoe NAT stats is PASSED ')
+                else:
+                    table_result.append(['Test Verify sdwan appqoe NAT stats ', 'FAIL'])
+                    self.logger.info('Test Verify sdwan appqoe NAT stats is FAILED ')
+                    flag = flag + 1
+
+                test_appqoe_libuinet = self.test_appqoe_libuinet_stats(device)
+
+                if test_appqoe_libuinet[0]:
+                    table_result.append(['Test Verify appqoe libuinet stats: ', 'PASS'])
+                    self.logger.info('Test Verify appqoe libuinet stats is PASSED ')
+                else:
+                    table_result.append(['Test Verify appqoe libuinet stats ', 'FAIL'])
+                    self.logger.info('Test Verify appqoe libuinet stats is FAILED ')
+                    flag = flag + 1
+
+                time.sleep(5)
+                ixL.stop_ixload_traffic()
+                ixL.cleanup_ix_traffic()
+                try:
+                    crashlogres = vman_session.dashboard.device_crashlog(profile, None,system_ip)
+                    if crashlogres.status_code == 200:
+                        self.logger.info('Fetching crash details from device')
+                        data = json.loads(crashlogres.content)['data']
+                        if not data:
+                            self.logger.info('Crash is not seen for device [%s]' % device)
+                            table_result.append(['Test Check Crash logs: ', 'PASS'])
+                        else:
+                            table_result.append(['Test Check Crash logs: ', 'FAIL'])
+                            self.logger.info(' ******** Crash found ********** ')
+                            self.logger.info('Crash found for device [%s]' % device)
+                            for eachcrash in data :
+                                self.logger.info('core time :', eachcrash['core-time'])
+                                self.logger.info('core filename :', eachcrash['core-filename'])
+                                self.logger.info('core timedate :',eachcrash['core-time-date'])
+                            flag = flag + 1
+                except:
+                    pass
+                    self.logger.info('Caught an exception on fetching crash log for iteration: {}'.format(i))
+
+        table.add_rows(table_result)
+        print table.draw()
+        if flag == 0:
+            return [True,'Testcase executed successfully']
+        else:
+            return [False,'Few configs failed']
+
+
     @run.test(['test_demo'])
     def test_demo(self,device='pm9009'):
         import pdb; pdb.set_trace()
@@ -6606,17 +6765,5 @@ class appqoe_system(object):
         return data
 
 if __name__ == '__main__':
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     run.call_all(appqoe_system)
-
-# QOSToBeApplied = [self.config['machines'][device]['service_side_intf']['intf'][0]]
-#                     self.logger.info('Starting QOS Verification:')
-#                     qos_verify = self.qos_stats(device,QOSToBeApplied)
-
-#                     if qos_verify[0]:
-#                         table_result.append(['Test Verify TCP proxy statistics: ', 'PASS'])
-#                         self.logger.info('Test Verify TCP proxy statistics is PASSED')
-#                     else:
-#                         table_result.append(['Test Verify TCP proxy statistics: ', 'FAIL'])
-#                         self.logger.info('Test Verify TCP proxy statistics is FAILED')
-#                         flag = flag + 1
