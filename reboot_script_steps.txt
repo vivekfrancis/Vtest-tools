@@ -1,39 +1,31 @@
 Steps to be done to execute Reboot script.
 1. source the profile.
-   source ~/.profile
+   source ~/.profile (Incase if you are not able to source. please copy the profile file from 10.104.45.88 make sure you have    the paths mentioned in the file)
 2. Execute "run.py" which is located under  "/home/tester/vtest-tools/confd_server"
    python run.py
 3. Execute the below commands in Jumphost
    unset http_proxy
    unset https_proxy
 4. Install texttable package in your Jumphost.
-   python2.7 -m pip install texttable
+   python2.7 -m pip install texttable --user
 5. Go to "/home/tester/vtest-tools/" path in your jumhost and copy the entire "lib" folder from 10.104.45.88
+   Go to "/home/tester/" path in your jumhost and copy the entire "ixia" folder from 10.104.45.88
    cd /home/tester/vtest-tools/
    scp -r tester@10.104.45.88:/home/tester/vtest-tools/lib/ .
+   scp -r tester@10.104.45.88:/home/tester/ixia/ .
 6. Go to "/home/tester/vtest-tools/flat_input/topology_yamls/" and copy the "bglsystemtestbed.yaml" file from 10.104.45.88.
    Note: you might have a yaml file in your jumphost for CLI regression with the same name "bglsystemtestbed.yaml"
-   If you already have a yaml file with that same name""bglsystemtestbed.yaml"" then rename it. As of now copy and use "bglsystemtestbed.yaml" for REST API 
+   If you already have a yaml file with that same name""bglsystemtestbed.yaml"" then rename it. As of now copy and use     "bglsystemtestbed.yaml" for REST API. please update the yaml with your setup details. 
    cd /home/tester/vtest-tools/flat_input/topology_yamls/
    scp tester@10.104.45.88:/home/tester/vtest-tools/flat_input/topology_yamls/bglsystemtestbed.yaml .
 7. Go to "/home/tester/vtest-tools/suites" path and copy "BglSystemtestbedDeviceConfigs" folder from 10.104.45.88
    cd /home/tester/vtest-tools/suites/
    scp -r tester@10.104.45.88:/home/tester/vtest-tools/suites/BglSystemtestbedDeviceConfigs/ .
-8. Copy vivek_appqoe_system.py file from 10.104.45.88.
+8. Copy appqoe_system.py and cli_checks.py and script_ixload.py files from 10.104.45.88.
    cd /home/tester/vtest-tools/suites/
-   scp tester@10.104.45.88:/home/tester/vtest-tools/suites/vivek_appqoe_system.py.
-9. You need make below changes in the code. Currently these steps are static we will be modifying these codes soon.
-   open vivek_appqoe_system.py and search and modify the device names according to your setup.
-
-   DEVICE_TYPE['pm9006']   = 'vedge-ASR-1002-HX'
-   DEVICE_TYPE['pm9008']   = 'vedge-ASR-1002-HX'
-   DEVICE_TYPE['pm9007']   = 'vedge-1000'
-   DEVICE_TYPE['pm9011']   = 'vedge-2000'
-   DEVICE_TYPE['pm9009']   = 'vedge-ISR-4351'
-   DEVICE_TYPE['pm9010']   = 'vedge-ISR-4461'
-   DEVICE_TYPE['pm9012']   = 'vedge-2000'
-
-    Provide the list of boxes in pm_vedges list for reboot.
+   scp tester@10.104.45.88:/home/tester/vtest-tools/suites/appqoe_system.py.
+   scp tester@10.104.45.88:/home/tester/vtest-tools/suites/cli_checks.py.
+9.  Provide the list of boxes in pm_vedges list for reboot.
     Number of devices and reboots can be changed in the below code according to your setup and requirement.
     @run.test(['RebootDevices'])
     def RebootDevices(self):
@@ -43,27 +35,10 @@ Steps to be done to execute Reboot script.
        PushfailedDevices = []
        table_result = []
        for i in range(1): # Number of reboot need to mentioned inside range. ex:range(50)
-    
-   You need to create the Feature template for the cedges before execting reboot script.
-   "NOTE" test_create_feature_template will remove the existing feature templates.
-   @run.test(['test_create_feature_template'])
-   def test_create_feature_template(self):
-           #***** Delete all existing non default feature templates *****
-           self.test_delete_all_existing_feature_templates()
-           pm_vedges = ['pm9006'] # mention the required cedges
+   
        
 10. Once you are done with all these changes you are ready to go.
     cd /home/tester/vtest-tools/suites/
-    To execute reboot script on cedges you need to execute the below script. 
-    For vedges you can skip this step.
-    python vivek_appqoe_system.py bglsystemtestbed -t test_create_feature_template -ntg -nt -ne -no_slack
-
-    After creating the template you need to edit vpn configs manually in the template.
-    Edit vpn 0 and vpn 512 and save it.
-    This manual interuption is due to bug. Please refer this bug.
-    CSCvt46442
-    
-
-    Once template creation is successfull you can execute reboot script with below commands
-    python vivek_appqoe_system.py bglsystemtestbed -t RebootDevices -ntg -nt -ne -no_slack 
+    To execute soak script on cedges you need to execute the below command under "/home/tester/vtest-tools/suites/" path. 
+    python appqoe_system.py bglsystemtestbed -t test_soak_test -ntg -nt -ne -no_slack 
  
